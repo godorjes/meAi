@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": 4,
+  "publishedAt": 0,
+  "note": "公共参考目录。只收录模型 ID，不写能力、价格、速度等未经核实的结论：未证明的字段一律留空，由界面标注为『参考模型，待验证』。各厂家账号真实可用的模型以该配置自己的官方查询结果为准。",
+  "providers": {
+    "openai": [
+      { "id": "gpt-5", "desc": "" },
+      { "id": "gpt-5-mini", "desc": "" },
+      { "id": "gpt-5-nano", "desc": "" },
+      { "id": "gpt-4.1", "desc": "" },
+      { "id": "gpt-4.1-mini", "desc": "" },
+      { "id": "gpt-4o", "desc": "" },
+      { "id": "o4-mini", "desc": "" }
+    ],
+    "glm": [
+      { "id": "glm-5.3", "desc": "" },
+      { "id": "glm-5.3-flash", "desc": "" },
+      { "id": "glm-5.2", "desc": "" },
+      { "id": "glm-5.1", "desc": "" },
+      { "id": "glm-4.7", "desc": "" },
+      { "id": "glm-4-flash-250414", "desc": "" }
+    ],
+    "deepseek": [
+      { "id": "deepseek-v4-pro", "desc": "" },
+      { "id": "deepseek-flash", "desc": "" }
+    ],
+    "kimi": [
+      { "id": "kimi-k3", "desc": "" },
+      { "id": "kimi-k2.6", "desc": "" },
+      { "id": "kimi-k2.7-code", "desc": "" },
+      { "id": "kimi-k2.7-code-highspeed", "desc": "" }
+    ]
+  }
+}

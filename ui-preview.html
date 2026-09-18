@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polyglot · UI 可视化确认稿</title>
+<style>
+  :root{
+    --ink:#0F1014;          /* 主按钮/深色 */
+    --ink-2:#1B222D;        /* 正文深色 */
+    --txt:#12141A;
+    --gray:#8A8F9C;         /* 次要文字 */
+    --gray-2:#B4B9C4;       /* 占位文字 */
+    --line:#E8EAF0;
+    --soft:#F5F6FA;         /* 浅灰底 */
+    --blue:#4A90F2;         /* 品牌蓝 */
+    --blue-deep:#2F6FD6;
+    --blue-soft:#EAF2FE;    /* 信息浅蓝 */
+    --blue-sel:#F0F6FF;     /* 选中浅蓝 */
+    --green:#18A860;
+    --green-soft:#E9F8F0;
+    --red:#DA2C1D;
+    --red-txt:#B3261E;
+    --red-soft:#FDF1F2;
+    --red-line:#F6C9C4;
+    --bubble:#1C2434;       /* 用户气泡深青 */
+    --code-bg:#1B222D;
+    --toast:#121927;
+    --pw:360px;             /* phone width */
+    --ph:780px;             /* phone height */
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{background:#ECEFF5}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans SC","Segoe UI",sans-serif;
+    color:var(--txt);padding:36px 40px 80px;
+  }
+  .mono{font-family:ui-monospace,"Cascadia Code","SF Mono",Consolas,monospace}
+
+  /* ======= 页面头部 ======= */
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:26px}
+  .page-head h1{font-size:26px;font-weight:800;letter-spacing:.5px}
+  .page-head h1 em{font-style:normal;color:var(--blue)}
+  .page-head p{margin-top:8px;font-size:13px;color:var(--gray)}
+  .legend{display:flex;gap:14px;align-items:center;font-size:12px;color:var(--gray);background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 16px}
+  .legend i{width:12px;height:12px;border-radius:4px;display:inline-block;margin-right:5px;vertical-align:-1px}
+
+  /* ======= 展板 ======= */
+  .board{background:#F7F8FB;border:1px solid #E4E7EE;border-radius:28px;padding:30px 34px 38px;margin-bottom:40px}
+  .board-title{font-size:19px;font-weight:800;letter-spacing:1px;margin-bottom:26px;display:flex;align-items:center;gap:12px}
+  .board-title::after{content:"";flex:1;height:1px;background:var(--line)}
+  .board-title .tag{font-size:11px;font-weight:600;color:var(--blue-deep);background:var(--blue-soft);border-radius:999px;padding:4px 12px;letter-spacing:.5px}
+  .screens{display:flex;flex-wrap:wrap;gap:30px;justify-content:flex-start}
+
+  .screen-card{width:var(--pw)}
+  .screen-cap{display:flex;gap:10px;align-items:baseline;margin-bottom:6px}
+  .screen-cap .no{font-size:15px;font-weight:800;color:var(--ink);font-family:ui-monospace,Consolas,monospace}
+  .screen-cap .t{font-size:16px;font-weight:700}
+  .screen-cap .s{font-size:12.5px;color:var(--gray);margin:0 0 14px 34px}
+  .note-chip{margin:14px 6px 0;display:inline-flex;align-items:center;gap:7px;background:var(--blue-soft);color:var(--blue-deep);font-size:12px;font-weight:600;border-radius:999px;padding:7px 14px}
+
+  /* ======= 手机框 ======= */
+  .phone{position:relative;width:var(--pw);height:var(--ph);background:#fff;border:1px solid #DFE3EA;border-radius:44px;overflow:hidden;
+         box-shadow:0 18px 44px -18px rgba(23,32,56,.28),0 4px 12px rgba(23,32,56,.06)}
+  .statusbar{height:46px;display:flex;align-items:center;justify-content:space-between;padding:6px 26px 0;font-size:13.5px;font-weight:700}
+  .statusbar .ics{display:flex;gap:5px;align-items:center;color:var(--ink)}
+  .homebar{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);width:122px;height:4.5px;border-radius:99px;background:#0F1014;opacity:.85;z-index:60}
+
+  /* ======= 通用组件 ======= */
+  .btn-primary{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--ink);color:#fff;border:none;border-radius:999px;
+               font-size:13.5px;font-weight:700;padding:13px 22px;cursor:pointer;letter-spacing:.5px;transition:transform .12s,opacity .12s}
+  .btn-primary:hover{opacity:.92}.btn-primary:active{transform:scale(.97)}
+  .btn-ghost{display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;color:var(--txt);border:1.5px solid var(--ink);
+             border-radius:999px;font-size:13px;font-weight:700;padding:11px 20px;cursor:pointer;transition:background .12s}
+  .btn-ghost:hover{background:var(--soft)}
+  .link{color:var(--blue);font-size:12.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:3px;cursor:pointer}
+  .field{margin-bottom:18px}
+  .field label{display:block;font-size:12px;color:var(--gray);margin-bottom:7px;font-weight:600}
+  .input{width:100%;background:var(--soft);border:1px solid transparent;border-radius:13px;padding:11.5px 14px;font-size:13.5px;color:var(--txt);
+         display:flex;align-items:center;gap:8px}
+  .input.focus{background:#fff;border-color:var(--blue)}
+  .hint{font-size:11px;color:var(--gray-2);margin-top:6px}
+  .chip{display:inline-flex;align-items:center;gap:4px;background:var(--soft);color:var(--gray);font-size:11px;font-weight:600;border-radius:999px;padding:4px 10px}
+  svg{flex:none}
+
+  /* ======= 01 首次使用 ======= */
+  .ob{height:calc(100% - 46px);display:flex;flex-direction:column;align-items:center;padding:56px 34px 60px;position:relative}
+  .ob-logo{width:74px;height:74px;border-radius:22px;background:var(--ink);display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+           box-shadow:0 12px 26px -10px rgba(15,16,20,.45)}
+  .ob-name{font-size:22px;font-weight:800;letter-spacing:.5px;margin-bottom:88px}
+  .ob-h{font-size:20px;font-weight:800;margin-bottom:10px;text-align:center}
+  .ob-p{font-size:13px;color:var(--gray);margin-bottom:30px;text-align:center}
+  .ob .btn-primary{width:216px;margin-bottom:16px}
+  .ob-foot{position:absolute;bottom:34px;left:0;right:0;text-align:center;font-size:11px;color:var(--gray-2)}
+
+  /* ======= 02 配置模型 ======= */
+  .navbar{height:48px;display:flex;align-items:center;gap:8px;padding:0 16px;border-bottom:1px solid #F1F2F6}
+  .navbar .tt{font-size:15px;font-weight:700;flex:1;text-align:center;margin-right:26px}
+  .cfg{height:calc(100% - 94px);overflow:hidden;padding:18px 20px 0;position:relative}
+  .cfg-sec{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;margin-bottom:14px;color:var(--ink-2)}
+  .cfg .input.readonly{color:var(--ink-2)}
+  .cfg .eye{margin-left:auto;color:var(--gray-2);cursor:pointer}
+  .cfg .sel-ic{width:20px;height:20px;border-radius:6px;background:var(--ink);color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .cfg .chev{margin-left:auto;color:var(--gray-2)}
+  .cfg-row{display:flex;align-items:center;gap:14px;margin:6px 0 20px}
+  .ok-dot{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--green)}
+  .ok-dot i{width:8px;height:8px;border-radius:99px;background:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .cfg-foot{position:absolute;left:20px;right:20px;bottom:26px}
+  .cfg-foot .btn-primary{width:100%}
+
+  /* ======= 03/05 聊天 ======= */
+  .chat-nav{height:56px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid #F1F2F6;gap:6px}
+  .chat-nav .mid{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .chat-nav .t{font-size:14.5px;font-weight:700}
+  .chat-body{height:calc(100% - 56px - 74px - 46px);padding:18px 16px;overflow:hidden;display:flex;flex-direction:column;gap:18px}
+  .msg-user{align-self:flex-end;max-width:82%;background:var(--bubble);color:#fff;font-size:13.5px;line-height:1.65;padding:11px 15px;border-radius:18px 18px 4px 18px}
+  .msg-ai{display:flex;gap:10px;max-width:94%}
+  .avatar{width:28px;height:28px;border-radius:9px;background:var(--ink);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px}
+  .ai-main{min-width:0;flex:1}
+  .ai-name{font-size:11.5px;color:var(--gray);font-weight:600;margin-bottom:5px}
+  .ai-text{font-size:13.5px;line-height:1.75;color:var(--ink-2)}
+  .codeblock{margin-top:10px;background:var(--code-bg);border-radius:14px;overflow:hidden;font-size:11.5px}
+  .codeblock .cb-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.05);color:#8E99AB;font-size:10.5px}
+  .codeblock pre{padding:12px 14px;overflow:hidden;line-height:1.7;color:#D7DEE9}
+  .k{color:#C792EA}.s{color:#A5D6A7}.f{color:#82AAFF}.c{color:#5B6577}.n{color:#F78C6C}
+  .copy-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:none;color:#8E99AB;font-size:10.5px;cursor:pointer;font-weight:600}
+  .copy-btn:hover{color:#fff}
+  .streaming{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--gray);margin-top:2px}
+  .streaming .dots i{display:inline-block;width:5px;height:5px;border-radius:99px;background:var(--gray-2);animation:blink 1.2s infinite}
+  .streaming .dots i:nth-child(2){animation-delay:.2s}.streaming .dots i:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+  .composer{position:absolute;left:0;right:0;bottom:0;padding:10px 12px 24px;background:linear-gradient(to top,#fff 78%,rgba(255,255,255,0))}
+  .composer .box{display:flex;align-items:center;gap:8px;background:var(--soft);border-radius:999px;padding:7px 7px 7px 16px}
+  .composer .ph{flex:1;font-size:13px;color:var(--gray-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .composer .draft{flex:1;font-size:13px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .net-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--gray);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 10px;cursor:pointer}
+  .send{width:34px;height:34px;border-radius:99px;background:var(--ink);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+  /* ======= 错误卡片(05) ======= */
+  .err-card{background:var(--red-soft);border:1px solid var(--red-line);border-radius:16px;padding:14px 15px}
+  .err-card .et{display:flex;align-items:center;gap:7px;color:var(--red);font-size:13.5px;font-weight:800;margin-bottom:5px}
+  .err-card .ed{font-size:12.5px;color:#9A5B54;margin-bottom:12px}
+  .err-card .btn-primary{padding:9px 20px;font-size:12.5px}
+
+  /* ======= 04/06 底部弹层 ======= */
+  .dim{position:absolute;inset:0;background:rgba(18,24,36,.46);z-index:20}
+  .sheet{position:absolute;left:0;right:0;bottom:0;z-index:30;background:#fff;border-radius:30px 30px 0 0;padding:10px 22px 30px;max-height:88%;
+         box-shadow:0 -14px 40px rgba(18,24,36,.22)}
+  .grab{width:38px;height:4.5px;border-radius:99px;background:#E3E6EC;margin:2px auto 14px}
+  .sheet h3{font-size:16px;font-weight:800;text-align:center;margin-bottom:8px}
+  .sheet .sd{font-size:12.5px;color:var(--gray);text-align:center;line-height:1.6;margin-bottom:12px}
+  .info-box{display:flex;gap:8px;align-items:flex-start;background:var(--blue-soft);border-radius:12px;padding:10px 12px;font-size:11.5px;color:var(--blue-deep);line-height:1.55;margin-bottom:16px}
+  .sheet .lb{font-size:12px;color:var(--gray);font-weight:700;margin-bottom:9px}
+  .m-list{display:flex;flex-direction:column;gap:9px;margin-bottom:16px}
+  .m-card{display:flex;align-items:center;gap:11px;border:1.5px solid var(--line);border-radius:15px;padding:11px 13px;cursor:pointer;transition:all .15s;background:#fff}
+  .m-card .mi{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex:none}
+  .m-card .mt{flex:1;min-width:0}
+  .m-card .mn{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px}
+  .m-card .md{font-size:11px;color:var(--gray);margin-top:2px}
+  .m-card .cur{font-size:9.5px;font-weight:700;color:var(--blue-deep);background:var(--blue-soft);border-radius:99px;padding:2.5px 8px}
+  .m-card .radio{width:19px;height:19px;border-radius:99px;border:1.5px solid #CBD0DB;flex:none;display:flex;align-items:center;justify-content:center;transition:all .15s}
+  .m-card.sel{border-color:var(--blue);background:var(--blue-sel)}
+  .m-card.sel .radio{background:var(--blue);border-color:var(--blue)}
+  .sheet .title-in{width:100%;background:var(--soft);border:1.5px solid transparent;border-radius:13px;padding:11px 13px;font-size:13px;color:var(--txt);outline:none;margin-bottom:18px}
+  .sheet .title-in:focus{border-color:var(--blue);background:#fff}
+  .sheet .frow{display:flex;gap:12px}
+  .sheet .frow .b{flex:1;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:13.5px;font-weight:700;padding:12.5px 0;cursor:pointer;border:none}
+  .b-cancel{background:var(--soft);color:var(--txt)}
+  .b-ok{background:var(--ink);color:#fff}
+  .err-banner{display:flex;align-items:center;gap:9px;background:var(--red-soft);border:1px solid var(--red-line);border-radius:13px;padding:10px 13px;margin-bottom:14px}
+  .err-banner .et{flex:1;font-size:12.5px;font-weight:700;color:var(--red-txt);display:flex;align-items:center;gap:7px}
+  .err-banner .rb{background:var(--ink);color:#fff;border:none;border-radius:999px;font-size:11.5px;font-weight:700;padding:7px 15px;cursor:pointer}
+
+  /* ======= 07 会话列表 ======= */
+  .list-head{display:flex;align-items:center;gap:9px;padding:6px 20px 14px}
+  .list-head .lg{width:26px;height:26px;border-radius:8px;background:var(--ink);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .list-head .nm{font-size:16.5px;font-weight:800}
+  .list-tools{padding:0 20px;display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+  .list-tools .btn-primary{width:100%;padding:11px}
+  .search{display:flex;align-items:center;gap:8px;background:var(--soft);border-radius:12px;padding:10px 13px;font-size:12.5px;color:var(--gray-2)}
+  .sess-group{padding:0 12px}
+  .sess-group .gl{font-size:11px;color:var(--gray-2);font-weight:700;padding:6px 10px;letter-spacing:1px}
+  .sess{display:flex;align-items:center;gap:10px;padding:11px 10px;border-radius:13px;cursor:pointer}
+  .sess:hover{background:var(--soft)}
+  .sess .si{color:var(--gray-2)}
+  .sess .st{flex:1;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sess .tagm{font-size:9.5px;font-weight:700;color:var(--gray);background:var(--soft);border:1px solid var(--line);border-radius:99px;padding:3px 8px;flex:none}
+  .sess.del{opacity:.38}
+  .sess.del .st{text-decoration:line-through}
+  .list-foot{position:absolute;left:0;right:0;bottom:0;padding:12px 20px 26px;border-top:1px solid #F1F2F6;background:#fff;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--gray);font-weight:600}
+  .toast{position:absolute;left:50%;transform:translateX(-50%);bottom:88px;z-index:40;background:var(--toast);color:#fff;border-radius:14px;
+         padding:12px 16px;display:flex;align-items:center;gap:18px;font-size:12.5px;font-weight:600;box-shadow:0 14px 34px -8px rgba(10,16,30,.5);
+         transition:all .35s;white-space:nowrap}
+  .toast .undo{color:#7EB0F7;font-weight:800;cursor:pointer;background:none;border:none;font-size:12.5px;display:flex;align-items:center;gap:5px}
+  .toast.hide{opacity:0;transform:translateX(-50%) translateY(14px);pointer-events:none}
+
+  .page-foot{margin-top:10px;font-size:12.5px;color:var(--gray);line-height:2;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 24px}
+  .page-foot b{color:var(--txt)}
+  .kbd{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700}
+</style>
+</head>
+<body>
+
+<!-- ================= 页面头部 ================= -->
+<div class="page-head">
+  <div>
+    <h1><em>Polyglot</em> · UI 可视化确认稿</h1>
+    <p>依据两张设计图还原的 7 个核心界面（静态可视化 + 少量可点交互）——确认布局、文案与风格无误后，再进入正式开发。</p>
+  </div>
+  <div class="legend">
+    <span><i style="background:#0F1014"></i>主按钮/深色</span>
+    <span><i style="background:#4A90F2"></i>品牌蓝</span>
+    <span><i style="background:#18A860"></i>成功</span>
+    <span><i style="background:#DA2C1D"></i>错误</span>
+    <span><i style="background:#1C2434"></i>用户气泡/代码块</span>
+  </div>
+</div>
+
+<!-- ================= 展板一：核心流程 ================= -->
+<div class="board">
+  <div class="board-title">Polyglot · 核心流程 <span class="tag">01 – 04</span></div>
+  <div class="screens">
+
+    <!-- ===== 01 首次使用 ===== -->
+    <div class="screen-card">
+      <div class="screen-cap"><span class="no">01</span><span class="t">首次使用</span></div>
+      <div class="screen-cap s">简洁引导，快速开始</div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="ics">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor"><path d="M7.5 9.2 5.6 7.3a2.7 2.7 0 0 1 3.8 0L7.5 9.2zM3.5 5.2a5.6 5.6 0 0 1 8 0L10 6.7a3.5 3.5 0 0 0-5 0L3.5 5.2zM1 2.7a9.2 9.2 0 0 1 13 0l-1.5 1.5a7.1 7.1 0 0 0-10 0L1 2.7z"/></svg>
+          <svg width="23" height="11" viewBox="0 0 25 12"><rect x=".5" y=".5" width="20" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2.5" y="2.5" width="14" height="7" rx="1.5" fill="currentColor"/><path d="M23 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg>
+        </span></div>
+        <div class="ob">
+          <div class="ob-logo">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="12.5" stroke="#fff" stroke-width="2.6"/><path d="M7.5 20h25M20 7.5c-3.4 3.3-5.1 7.6-5.1 12.5s1.7 9.2 5.1 12.5c3.4-3.3 5.1-7.6 5.1-12.5S23.4 10.8 20 7.5z" stroke="#fff" stroke-width="2.6"/></svg>
+          </div>
+          <div class="ob-name">Polyglot</div>
+          <div class="ob-h">连接模型，开始对话</div>
+          <div class="ob-p">先配置 API Key，即可使用你的模型。</div>
+          <button class="btn-primary">配置 API Key</button>
+          <a class="link">如何获取 API Key
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          </a>
+          <div class="ob-foot">配置模型后开始对话</div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+    </div>
+
+    <!-- ===== 02 配置模型 ===== -->
+    <div class="screen-card">
+      <div class="screen-cap"><span class="no">02</span><span class="t">配置模型</span></div>
+      <div class="screen-cap s">填写必要信息，测试连接</div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="ics">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor"><path d="M7.5 9.2 5.6 7.3a2.7 2.7 0 0 1 3.8 0L7.5 9.2zM3.5 5.2a5.6 5.6 0 0 1 8 0L10 6.7a3.5 3.5 0 0 0-5 0L3.5 5.2zM1 2.7a9.2 9.2 0 0 1 13 0l-1.5 1.5a7.1 7.1 0 0 0-10 0L1 2.7z"/></svg>
+          <svg width="23" height="11" viewBox="0 0 25 12"><rect x=".5" y=".5" width="20" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2.5" y="2.5" width="14" height="7" rx="1.5" fill="currentColor"/><path d="M23 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg>
+        </span></div>
+        <div class="navbar">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#12141A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer"><path d="M15 18l-6-6 6-6"/></svg>
+          <span class="tt">添加模型服务</span>
+        </div>
+        <div class="cfg">
+          <div class="cfg-sec">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#12141A" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 12l2 2 4-4"/></svg>
+            基本信息
+          </div>
+          <div class="field">
+            <label>配置名称</label>
+            <div class="input focus">我的 Kimi</div>
+          </div>
+          <div class="field">
+            <label>服务商</label>
+            <div class="input readonly"><span class="sel-ic">K</span>Kimi
+              <svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+          </div>
+          <div class="field">
+            <label>接口类型</label>
+            <div class="input readonly" style="color:var(--gray)">OpenAI 兼容格式</div>
+          </div>
+          <div class="field">
+            <label>API 地址</label>
+            <div class="input readonly mono" style="font-size:12.5px">https://api.moonshot.cn/v1</div>
+            <div class="hint">API 地址已自动填写，可修改。</div>
+          </div>
+          <div class="field">
+            <label>API Key</label>
+            <div class="input focus">••••••••••••••••••
+              <svg class="eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg>
+            </div>
+            <div class="hint" style="text-align:right"><a class="link">获取 API Key
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+            </div>
+          </div>
+          <div class="cfg-row">
+            <button class="btn-ghost" id="btn-test">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2z"/></svg>
+              <span id="btn-test-txt">测试连接</span>
+            </button>
+            <span class="ok-dot" id="test-ok"><i></i>连接成功</span>
+          </div>
+          <div class="cfg-foot"><button class="btn-primary">保存并开始对话</button></div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+    </div>
+
+    <!-- ===== 03 对话 · 生成中 ===== -->
+    <div class="screen-card">
+      <div class="screen-cap"><span class="no">03</span><span class="t">对话 · 生成中</span></div>
+      <div class="screen-cap s">流畅的对话体验</div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="ics">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor"><path d="M7.5 9.2 5.6 7.3a2.7 2.7 0 0 1 3.8 0L7.5 9.2zM3.5 5.2a5.6 5.6 0 0 1 8 0L10 6.7a3.5 3.5 0 0 0-5 0L3.5 5.2zM1 2.7a9.2 9.2 0 0 1 13 0l-1.5 1.5a7.1 7.1 0 0 0-10 0L1 2.7z"/></svg>
+          <svg width="23" height="11" viewBox="0 0 25 12"><rect x=".5" y=".5" width="20" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2.5" y="2.5" width="14" height="7" rx="1.5" fill="currentColor"/><path d="M23 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg>
+        </span></div>
+        <div class="chat-nav">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#12141A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer"><path d="M15 18l-6-6 6-6"/></svg>
+          <div class="mid">
+            <span class="t">React useEffect 问题</span>
+            <span class="chip">Kimi 8K
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12141A" stroke-width="2.2" stroke-linecap="round" style="cursor:pointer"><circle cx="5" cy="12" r="1.3" fill="#12141A"/><circle cx="12" cy="12" r="1.3" fill="#12141A"/><circle cx="19" cy="12" r="1.3" fill="#12141A"/></svg>
+        </div>
+        <div class="chat-body">
+          <div class="msg-user">如果依赖是一个对象，应该怎么处理？</div>
+          <div class="msg-ai">
+            <div class="avatar">K</div>
+            <div class="ai-main">
+              <div class="ai-name">Kimi 8K</div>
+              <div class="ai-text">对象每次渲染可能产生新引用。可以用 <span class="mono" style="font-size:12px;background:var(--soft);border-radius:6px;padding:1px 6px">useMemo</span> 稳定依赖：</div>
+              <div class="codeblock">
+                <div class="cb-head"><span>JavaScript</span>
+                  <button class="copy-btn" data-copy>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                    <span>复制</span>
+                  </button>
+                </div>
+                <pre><span class="k">const</span> options = <span class="f">useMemo</span>(() =&gt; ({
+  method: <span class="s">'GET'</span>,
+  headers: { Authorization:
+    <span class="s">`Bearer ${apiKey}`</span> }
+}), [apiKey]);</pre>
+              </div>
+              <div class="ai-text" style="margin-top:10px">也可以直接依赖对象中的基础字段。</div>
+              <div class="streaming"><span class="dots"><i></i><i></i><i></i></span>正在生成…</div>
+            </div>
+          </div>
+        </div>
+        <div class="composer">
+          <div class="box">
+            <span class="ph">输入消息…</span>
+            <span class="net-chip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14.5 14.5 0 0 1 0 18M12 3a14.5 14.5 0 0 0 0 18"/></svg>
+              联网
+            </span>
+            <button class="send"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+          </div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+    </div>
+
+    <!-- ===== 04 换模型续聊 ===== -->
+    <div class="screen-card">
+      <div class="screen-cap"><span class="no">04</span><span class="t">换模型续聊</span></div>
+      <div class="screen-cap s">一键切换模型，保留原会话</div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="ics">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor"><path d="M7.5 9.2 5.6 7.3a2.7 2.7 0 0 1 3.8 0L7.5 9.2zM3.5 5.2a5.6 5.6 0 0 1 8 0L10 6.7a3.5 3.5 0 0 0-5 0L3.5 5.2zM1 2.7a9.2 9.2 0 0 1 13 0l-1.5 1.5a7.1 7.1 0 0 0-10 0L1 2.7z"/></svg>
+          <svg width="23" height="11" viewBox="0 0 25 12"><rect x=".5" y=".5" width="20" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2.5" y="2.5" width="14" height="7" rx="1.5" fill="currentColor"/><path d="M23 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg>
+        </span></div>
+        <div class="chat-nav">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#12141A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <div class="mid">
+            <span class="t">React useEffect 问题</span>
+            <span class="chip">Kimi 8K
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12141A" stroke-width="2.2" stroke-linecap="round"><circle cx="5" cy="12" r="1.3" fill="#12141A"/><circle cx="12" cy="12" r="1.3" fill="#12141A"/><circle cx="19" cy="12" r="1.3" fill="#12141A"/></svg>
+        </div>
+        <div class="chat-body" style="height:calc(100% - 102px)">
+          <div class="msg-user">如果依赖是一个对象，应该怎么处理？</div>
+          <div class="msg-ai">
+            <div class="avatar">K</div>
+            <div class="ai-main">
+              <div class="ai-name">Kimi 8K</div>
+              <div class="ai-text">对象每次渲染可能产生新引用。可以用 useMemo 稳定依赖…</div>
+            </div>
+          </div>
+        </div>
+        <div class="dim"></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <h3>换模型续聊</h3>
+          <div class="sd">复制当前对话，创建新会话。原会话保留。</div>
+          <div class="info-box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A90F2" stroke-width="2.4" stroke-linecap="round" style="margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>
+            携带当前文字记录；内容过长时会提示。
+          </div>
+          <div class="lb">选择模型</div>
+          <div class="m-list">
+            <div class="m-card" data-model="Kimi 8K">
+              <span class="mi" style="background:#0F1014">K</span>
+              <div class="mt"><div class="mn">Kimi 8K <span class="cur">当前模型</span></div><div class="md">响应较快，适合日常对话</div></div>
+              <span class="radio"></span>
+            </div>
+            <div class="m-card" data-model="Kimi 32K">
+              <span class="mi" style="background:#0F1014">K</span>
+              <div class="mt"><div class="mn">Kimi 32K</div><div class="md">支持更长上下文</div></div>
+              <span class="radio"></span>
+            </div>
+            <div class="m-card sel" data-model="DeepSeek-V3">
+              <span class="mi" style="background:#4A90F2">DS</span>
+              <div class="mt"><div class="mn">DeepSeek-V3</div><div class="md">代码与逻辑推理能力强</div></div>
+              <span class="radio"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 10 18 19.5 6.5"/></svg></span>
+            </div>
+            <div class="m-card" data-model="DeepSeek-R1">
+              <span class="mi" style="background:#7C5CFC">R1</span>
+              <div class="mt"><div class="mn">DeepSeek-R1</div><div class="md">擅长复杂推理与深度思考</div></div>
+              <span class="radio"></span>
+            </div>
+          </div>
+          <div class="lb">新会话标题</div>
+          <input class="title-in" data-title-input value="React useEffect 问题 · DeepSeek-V3">
+          <div class="frow">
+            <button class="b b-cancel">取消</button>
+            <button class="b b-ok">创建新会话并继续</button>
+          </div>
+        </div>
+        <div class="homebar" style="z-index:50;background:#fff;opacity:.9"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= 展板二：失败恢复与撤销 ================= -->
+<div class="board">
+  <div class="board-title">Polyglot · 失败恢复与撤销 <span class="tag">05 – 07</span></div>
+  <div class="screens">
+
+    <!-- ===== 05 回复失败 ===== -->
+    <div class="screen-card">
+      <div class="screen-cap"><span class="no">05</span><span class="t">回复失败</span></div>
+      <div class="screen-cap s">连接中断时的原地重试</div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="ics">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor"><path d="M7.5 9.2 5.6 7.3a2.7 2.7 0 0 1 3.8 0L7.5 9.2zM3.5 5.2a5.6 5.6 0 0 1 8 0L10 6.7a3.5 3.5 0 0 0-5 0L3.5 5.2zM1 2.7a9.2 9.2 0 0 1 13 0l-1.5 1.5a7.1 7.1 0 0 0-10 0L1 2.7z"/></svg>
+          <svg width="23" height="11" viewBox="0 0 25 12"><rect x=".5" y=".5" width="20" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2.5" y="2.5" width="14" height="7" rx="1.5" fill="currentColor"/><path d="M23 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg>
+        </span></div>
+        <div class="chat-nav">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#12141A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer"><path d="M15 18l-6-6 6-6"/></svg>
+          <div class="mid">
+            <span class="t">React useEffect 问题</span>
+            <span class="chip">Kimi 8K
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12141A" stroke-width="2.2" stroke-linecap="round"><circle cx="5" cy="12" r="1.3" fill="#12141A"/><circle cx="12" cy="12" r="1.3" fill="#12141A"/><circle cx="19" cy="12" r="1.3" fill="#12141A"/></svg>
+        </div>
+        <div class="chat-body">
+          <div class="msg-user">如果依赖是一个对象，应该怎么处理？</div>
+          <div class="msg-ai">
+            <div class="avatar">K</div>
+            <div class="ai-main">
+              <div class="ai-name">Kimi 8K</div>
+              <div class="err-card">
+                <div class="et">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 8.5v5M12 17v.5"/><path d="M10.3 3.8 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0z"/></svg>
+                  回复失败
+                </div>
+                <div class="ed">连接中断，请重试。</div>
+                <button class="btn-primary" id="btn-retry">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>
+                  <span id="btn-retry-txt">重试</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="composer">
+          <div class="box">
+            <span class="draft">可以给我一个完整示例吗？</span>
+            <span class="net-chip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14.5 14.5 0 0 1 0 18M12 3a14.5 14.5 0 0 0 0 18"/></svg>
+              联网
+            </span>
+            <button class="send"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+          </div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+      <div class="note-chip">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>
+        保留消息和草稿，原地重试
+      </div>
+    </div>
+
+    <!-- ===== 06 换模型失败 ===== -->
+    <div class="screen-card">
+      <div class="screen-cap"><span class="no">06</span><span class="t">换模型失败</span></div>
+      <div class="screen-cap s">创建失败时保留现场</div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="ics">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor"><path d="M7.5 9.2 5.6 7.3a2.7 2.7 0 0 1 3.8 0L7.5 9.2zM3.5 5.2a5.6 5.6 0 0 1 8 0L10 6.7a3.5 3.5 0 0 0-5 0L3.5 5.2zM1 2.7a9.2 9.2 0 0 1 13 0l-1.5 1.5a7.1 7.1 0 0 0-10 0L1 2.7z"/></svg>
+          <svg width="23" height="11" viewBox="0 0 25 12"><rect x=".5" y=".5" width="20" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2.5" y="2.5" width="14" height="7" rx="1.5" fill="currentColor"/><path d="M23 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg>
+        </span></div>
+        <div class="chat-nav">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#12141A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <div class="mid">
+            <span class="t">React useEffect 问题</span>
+            <span class="chip">Kimi 8K
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12141A" stroke-width="2.2" stroke-linecap="round"><circle cx="5" cy="12" r="1.3" fill="#12141A"/><circle cx="12" cy="12" r="1.3" fill="#12141A"/><circle cx="19" cy="12" r="1.3" fill="#12141A"/></svg>
+        </div>
+        <div class="chat-body" style="height:calc(100% - 102px)">
+          <div class="msg-user">如果依赖是一个对象，应该怎么处理？</div>
+          <div class="msg-ai">
+            <div class="avatar">K</div>
+            <div class="ai-main">
+              <div class="ai-name">Kimi 8K</div>
+              <div class="ai-text">对象每次渲染可能产生新引用。可以用 useMemo 稳定依赖…</div>
+            </div>
+          </div>
+        </div>
+        <div class="dim"></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <h3>换模型续聊</h3>
+          <div class="sd">复制当前对话，创建新会话。原会话保留。</div>
+          <div class="info-box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A90F2" stroke-width="2.4" stroke-linecap="round" style="margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>
+            携带当前文字记录；内容过长时会提示。
+          </div>
+          <div class="err-banner">
+            <span class="et">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DA2C1D" stroke-width="2.4" stroke-linecap="round"><path d="M12 8.5v5M12 17v.5"/><path d="M10.3 3.8 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0z"/></svg>
+              创建失败，请重试。
+            </span>
+            <button class="rb" id="btn-retry2">重试</button>
+          </div>
+          <div class="lb">选择模型</div>
+          <div class="m-list" style="gap:8px">
+            <div class="m-card" style="padding:9px 13px" data-model="Kimi 8K">
+              <span class="mi" style="background:#0F1014">K</span>
+              <div class="mt"><div class="mn">Kimi 8K <span class="cur">当前模型</span></div><div class="md">响应轻快，适合日常对话</div></div>
+              <span class="radio"></span>
+            </div>
+            <div class="m-card" style="padding:9px 13px" data-model="Kimi 32K">
+              <span class="mi" style="background:#0F1014">K</span>
+              <div class="mt"><div class="mn">Kimi 32K</div><div class="md">支持超长上下文记忆与资料吸收</div></div>
+              <span class="radio"></span>
+            </div>
+            <div class="m-card sel" style="padding:9px 13px" data-model="DeepSeek-V3">
+              <span class="mi" style="background:#4A90F2">DS</span>
+              <div class="mt"><div class="mn">DeepSeek-V3</div><div class="md">极致逻辑、算法推导与代码诊断</div></div>
+              <span class="radio"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 10 18 19.5 6.5"/></svg></span>
+            </div>
+            <div class="m-card" style="padding:9px 13px" data-model="DeepSeek-R1">
+              <span class="mi" style="background:#7C5CFC">R1</span>
+              <div class="mt"><div class="mn">DeepSeek-R1</div><div class="md">深度思考，复杂问题逐步推理</div></div>
+              <span class="radio"></span>
+            </div>
+          </div>
+          <div class="lb">新会话标题</div>
+          <input class="title-in" data-title-input value="React useEffect 问题 · DeepSeek-V3" style="margin-bottom:14px">
+          <div class="frow">
+            <button class="b b-cancel">取消</button>
+            <button class="b b-ok">创建新会话并继续</button>
+          </div>
+        </div>
+        <div class="homebar" style="z-index:50;background:#fff;opacity:.9"></div>
+      </div>
+      <div class="note-chip">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>
+        保留选择与标题，成功后再跳转
+      </div>
+    </div>
+
+    <!-- ===== 07 删除后撤销 ===== -->
+    <div class="screen-card">
+      <div class="screen-cap"><span class="no">07</span><span class="t">删除后撤销</span></div>
+      <div class="screen-cap s">会话列表 · 误删保护</div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="ics">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor"><path d="M7.5 9.2 5.6 7.3a2.7 2.7 0 0 1 3.8 0L7.5 9.2zM3.5 5.2a5.6 5.6 0 0 1 8 0L10 6.7a3.5 3.5 0 0 0-5 0L3.5 5.2zM1 2.7a9.2 9.2 0 0 1 13 0l-1.5 1.5a7.1 7.1 0 0 0-10 0L1 2.7z"/></svg>
+          <svg width="23" height="11" viewBox="0 0 25 12"><rect x=".5" y=".5" width="20" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2.5" y="2.5" width="14" height="7" rx="1.5" fill="currentColor"/><path d="M23 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg>
+        </span></div>
+        <div class="list-head">
+          <span class="lg">
+            <svg width="15" height="15" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="13" stroke="#fff" stroke-width="3"/><path d="M7 20h26M20 7c-3.6 3.4-5.4 8-5.4 13s1.8 9.6 5.4 13c3.6-3.4 5.4-8 5.4-13S23.6 10.4 20 7z" stroke="#fff" stroke-width="3"/></svg>
+          </span>
+          <span class="nm">Polyglot</span>
+        </div>
+        <div class="list-tools">
+          <button class="btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            新建会话
+          </button>
+          <div class="search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+            搜索会话
+          </div>
+        </div>
+        <div class="sess-group">
+          <div class="gl">今天</div>
+          <div class="sess del" id="sess-deleted">
+            <svg class="si" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg>
+            <span class="st">React useEffect 问题</span><span class="tagm">Kimi 8K</span>
+          </div>
+          <div class="sess">
+            <svg class="si" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg>
+            <span class="st">Python 爬虫入门</span><span class="tagm">Kimi 32K</span>
+          </div>
+          <div class="gl" style="margin-top:8px">昨天</div>
+          <div class="sess">
+            <svg class="si" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg>
+            <span class="st">周报草稿</span><span class="tagm">Kimi 8K</span>
+          </div>
+          <div class="sess">
+            <svg class="si" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg>
+            <span class="st">项目需求整理</span><span class="tagm">DeepSeek-V3</span>
+          </div>
+        </div>
+        <div class="toast" id="toast">
+          <span>会话已删除</span>
+          <button class="undo" id="btn-undo">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>
+            撤销
+          </button>
+        </div>
+        <div class="list-foot">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+          设置 · 模型服务
+        </div>
+        <div class="homebar"></div>
+      </div>
+      <div class="note-chip">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>
+        删除后 5 秒内可撤销
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= 说明 ================= -->
+<div class="page-foot">
+  <b>可点交互预览：</b>02「测试连接」会模拟检测并显示 <span class="ok-dot" style="font-size:11.5px"><i></i>连接成功</span>；04 / 06 中点击模型卡片可切换选中并自动更新新会话标题；03 代码块「复制」可复制示例代码；05「重试」与 06「重试」模拟重试中状态；07「撤销」可恢复被删除的会话行。<br>
+  <b>待确认项：</b>① 整体为移动端竖屏布局（含状态栏 9:41 与 Home 指示条）；② 主按钮为近黑色、品牌色仅用于链接/信息提示/选中态；③ 04 与 06 的模型描述文案在两图中略有差异，已分别按原图还原；④ 换模型续聊为底部弹层（Bottom Sheet）形态。确认或有修改意见后，进入正式开发。
+</div>
+
+<script>
+// ---- 04/06 选择模型：切换选中态 + 更新标题 ----
+document.querySelectorAll('.m-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const list = card.closest('.m-list');
+    list.querySelectorAll('.m-card').forEach(c => {
+      c.classList.remove('sel');
+      c.querySelector('.radio').innerHTML = '';
+    });
+    card.classList.add('sel');
+    card.querySelector('.radio').innerHTML =
+      '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 10 18 19.5 6.5"/></svg>';
+    const sheet = card.closest('.sheet');
+    const input = sheet.querySelector('[data-title-input]');
+    if (input) input.value = 'React useEffect 问题 · ' + card.dataset.model;
+  });
+});
+
+// ---- 02 测试连接 ----
+const btnTest = document.getElementById('btn-test');
+if (btnTest) btnTest.addEventListener('click', () => {
+  const txt = document.getElementById('btn-test-txt');
+  const ok = document.getElementById('test-ok');
+  ok.style.opacity = '0';
+  txt.textContent = '测试中…';
+  btnTest.style.opacity = '.55';
+  setTimeout(() => {
+    txt.textContent = '测试连接';
+    btnTest.style.opacity = '1';
+    ok.style.transition = 'opacity .3s';
+    ok.style.opacity = '1';
+  }, 900);
+});
+
+// ---- 03 复制代码 ----
+document.querySelectorAll('[data-copy]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const code = btn.closest('.codeblock').querySelector('pre').innerText;
+    if (navigator.clipboard) navigator.clipboard.writeText(code).catch(() => {});
+    const span = btn.querySelector('span');
+    const old = span.textContent;
+    span.textContent = '已复制 ✓';
+    setTimeout(() => span.textContent = old, 1400);
+  });
+});
+
+// ---- 05 重试 ----
+const btnRetry = document.getElementById('btn-retry');
+if (btnRetry) btnRetry.addEventListener('click', () => {
+  const txt = document.getElementById('btn-retry-txt');
+  txt.textContent = '重试中…';
+  btnRetry.style.opacity = '.6';
+  setTimeout(() => { txt.textContent = '重试'; btnRetry.style.opacity = '1'; }, 1100);
+});
+
+// ---- 06 重试 ----
+const btnRetry2 = document.getElementById('btn-retry2');
+if (btnRetry2) btnRetry2.addEventListener('click', () => {
+  btnRetry2.textContent = '创建中…';
+  btnRetry2.style.opacity = '.6';
+  setTimeout(() => { btnRetry2.textContent = '重试'; btnRetry2.style.opacity = '1'; }, 1100);
+});
+
+// ---- 07 撤销 ----
+const btnUndo = document.getElementById('btn-undo');
+if (btnUndo) btnUndo.addEventListener('click', () => {
+  document.getElementById('toast').classList.add('hide');
+  const row = document.getElementById('sess-deleted');
+  row.classList.remove('del');
+});
+</script>
+</body>
+</html>
