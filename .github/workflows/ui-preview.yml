@@ -2,8 +2,6 @@ name: UI Preview
 
 on:
   workflow_dispatch:
-  push:
-    branches: [codex/diagnose-ui-preview]
 
 permissions:
   contents: read
@@ -45,7 +43,6 @@ jobs:
           sed -i '/maven\.aliyun\.com/d' settings.gradle.kts
 
       - name: 渲染全部预览
-        id: preview
         run: |
           preview_class=app.polyglot.dev.preview.AppPreviewsKt
           screens=(Onboarding EmptyChat Conversation Sessions SwitchModel ModelServices AddService EditService)
@@ -56,7 +53,7 @@ jobs:
 
           preview_dir="$RUNNER_TEMP/compose-previews"
           android --sdk="$ANDROID_HOME" preview render :app \
-            --output="$preview_dir" "${preview_args[@]}" -- --info --stacktrace
+            --output="$preview_dir" "${preview_args[@]}"
 
           mkdir -p ui-previews
           class_dir="${preview_class//./\/}"
@@ -69,14 +66,6 @@ jobs:
             cp "$png" "ui-previews/$screen.png"
           done
           file ui-previews/*.png
-
-      - name: 输出预览失败日志
-        if: failure() && steps.preview.outcome == 'failure'
-        run: |
-          shopt -s nullglob
-          for log in /tmp/build-log-*.log; do
-            tail -n 200 "$log"
-          done
 
       - name: 上传截图
         uses: actions/upload-artifact@v4
