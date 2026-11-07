@@ -1,6 +1,5 @@
 package app.polyglot.dev.feature.chat
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -91,8 +90,6 @@ fun SwitchModelPage(
     onStopAndContinue: () -> Unit,
     onConfirm: (ModelTarget, String, (Boolean, String?) -> Unit) -> Unit
 ) {
-    BackHandler { onBack() }
-
     val scroll = rememberScrollState()
     val scope = rememberCoroutineScope()
     val titleFocus = remember { FocusRequester() }
