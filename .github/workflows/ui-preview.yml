@@ -1,0 +1,55 @@
+name: UI Preview
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: 获取当前分支代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: 配置 Gradle 缓存
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: 安装云端渲染工具
+        run: |
+          curl -fsSL \
+            https://dl.google.com/android/cli/latest/linux_x86_64/install.sh \
+            -o "$RUNNER_TEMP/install-android-cli.sh"
+          bash "$RUNNER_TEMP/install-android-cli.sh"
+          android -V
+
+      - name: 准备云端编译环境
+        run: |
+          chmod +x gradlew
+          printf 'sdk.dir=%s\n' "$ANDROID_HOME" > local.properties
+          sed -i \
+            's#mirrors.cloud.tencent.com/gradle/#services.gradle.org/distributions/#' \
+            gradle/wrapper/gradle-wrapper.properties
+
+      - name: 渲染引导页
+        run: |
+          android --sdk="$ANDROID_HOME" preview render :app \
+            --fqn=app.polyglot.dev.preview.OnboardingPreviewKt.OnboardingPreview \
+            --output=ui-previews
+
+      - name: 上传截图
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-preview
+          path: ui-previews/
+          if-no-files-found: error
+          retention-days: 7
