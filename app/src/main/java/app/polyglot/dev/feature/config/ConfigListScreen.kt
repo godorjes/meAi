@@ -82,11 +82,34 @@ fun ConfigListScreen(
     val providers by vm.providers.collectAsStateWithLifecycle()
     val message by vm.message.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
-    var pendingDelete by remember { mutableStateOf<ProviderEntity?>(null) }
 
     LaunchedEffect(message) {
         message?.let { snackbar.showSnackbar(it); vm.clearMessage() }
     }
+
+    ConfigListContent(
+        providers = providers,
+        snackbar = snackbar,
+        modelCount = vm::modelCount,
+        onBack = onBack,
+        onAdd = onAdd,
+        onEdit = onEdit,
+        onDelete = vm::deleteProvider
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ConfigListContent(
+    providers: List<ProviderEntity>,
+    snackbar: SnackbarHostState,
+    modelCount: (ProviderEntity) -> Int,
+    onBack: () -> Unit,
+    onAdd: () -> Unit,
+    onEdit: (String) -> Unit,
+    onDelete: (String) -> Unit
+) {
+    var pendingDelete by remember { mutableStateOf<ProviderEntity?>(null) }
 
     Scaffold(
         topBar = {
@@ -168,7 +191,7 @@ fun ConfigListScreen(
                                         else -> "未测试" to Gray
                                     }
                                     Text(label, fontSize = 11.5.sp, color = color)
-                                    Text(" · ${vm.modelCount(p)} 个模型", fontSize = 11.5.sp, color = Gray)
+                                    Text(" · ${modelCount(p)} 个模型", fontSize = 11.5.sp, color = Gray)
                                 }
                             }
                             IconButton(onClick = { pendingDelete = p }) {
@@ -190,7 +213,7 @@ fun ConfigListScreen(
             text = { Text("将删除「${p.name}」及其密钥；历史聊天保留模型名称快照，仍可阅读。") },
             confirmButton = {
                 TextButton(onClick = {
-                    vm.deleteProvider(p.id)
+                    onDelete(p.id)
                     pendingDelete = null
                 }) { Text("删除", color = ErrorRed) }
             },

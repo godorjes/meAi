@@ -117,6 +117,57 @@ fun ConfigEditScreen(
     val focusRequest by vm.focusRequest.collectAsStateWithLifecycle()
     val listUpdatedAt by vm.listUpdatedAt.collectAsStateWithLifecycle()
 
+    val snackbar = remember { SnackbarHostState() }
+
+    LaunchedEffect(configId) { vm.load(configId) }
+    LaunchedEffect(message) { message?.let { snackbar.showSnackbar(it); vm.clearMessage() } }
+    LaunchedEffect(saved) { if (saved) onSavedStartChat() }
+
+    ConfigEditContent(
+        form = form,
+        catalogState = catalogState,
+        primaryChoices = primaryChoices,
+        testState = testState,
+        errors = errors,
+        focusRequest = focusRequest,
+        listUpdatedAt = listUpdatedAt,
+        snackbar = snackbar,
+        onBack = onBack,
+        onProviderChange = vm::updateProviderType,
+        onApiKeyChange = vm::updateApiKey,
+        onModelChange = vm::updateSelectedModel,
+        onManualModelEntryChange = vm::setManualModelEntry,
+        onTestConnection = vm::testConnection,
+        onModelNameChange = vm::updateModelName,
+        onSave = vm::save,
+        onToggleAdvanced = vm::toggleAdvanced,
+        onBaseUrlChange = vm::updateBaseUrl
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
+internal fun ConfigEditContent(
+    form: ConfigForm,
+    catalogState: CatalogUiState,
+    primaryChoices: List<ModelChoice>,
+    testState: TestUiState,
+    errors: FieldErrors,
+    focusRequest: FocusRequest?,
+    listUpdatedAt: Long?,
+    snackbar: SnackbarHostState,
+    onBack: () -> Unit,
+    onProviderChange: (String) -> Unit,
+    onApiKeyChange: (String) -> Unit,
+    onModelChange: (String) -> Unit,
+    onManualModelEntryChange: (Boolean) -> Unit,
+    onTestConnection: () -> Unit,
+    onModelNameChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onToggleAdvanced: () -> Unit,
+    onBaseUrlChange: (String) -> Unit
+) {
+    val context = LocalContext.current
     val fields = ConfigField.entries.map { remember { FieldLocator() } }
 
     LaunchedEffect(focusRequest) {
@@ -126,16 +177,11 @@ fun ConfigEditScreen(
         locator.bring.bringIntoView()
     }
 
-    val snackbar = remember { SnackbarHostState() }
     var keyVisible by remember { mutableStateOf(false) }
     var providerMenu by remember { mutableStateOf(false) }
     var modelMenu by remember { mutableStateOf(false) }
     // 选择模型时可输入关键字缩小列表，不强迫输入
     var modelFilter by remember(form.providerType) { mutableStateOf("") }
-
-    LaunchedEffect(configId) { vm.load(configId) }
-    LaunchedEffect(message) { message?.let { snackbar.showSnackbar(it); vm.clearMessage() } }
-    LaunchedEffect(saved) { if (saved) onSavedStartChat() }
 
     Scaffold(
         topBar = {
@@ -201,7 +247,7 @@ fun ConfigEditScreen(
                         DropdownMenuItem(
                             text = { Text(preset.label) },
                             onClick = {
-                                vm.updateProviderType(preset.type)
+                                onProviderChange(preset.type)
                                 providerMenu = false
                             }
                         )
@@ -214,7 +260,7 @@ fun ConfigEditScreen(
             FieldLabel("API Key", required = true, filled = form.apiKey.isNotBlank())
             OutlinedTextField(
                 value = form.apiKey,
-                onValueChange = vm::updateApiKey,
+                onValueChange = onApiKeyChange,
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(fields[ConfigField.API_KEY.ordinal].focus)
@@ -256,7 +302,7 @@ fun ConfigEditScreen(
             if (form.manualModelEntry) {
                 OutlinedTextField(
                     value = form.selectedModelId,
-                    onValueChange = vm::updateSelectedModel,
+                    onValueChange = onModelChange,
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(fields[ConfigField.MODEL.ordinal].focus)
@@ -268,7 +314,7 @@ fun ConfigEditScreen(
                     supportingText = errors[ConfigField.MODEL]?.let { { FieldError(it) } }
                 )
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = { vm.setManualModelEntry(false) }) {
+                    TextButton(onClick = { onManualModelEntryChange(false) }) {
                         Text("从列表选择", fontSize = 12.sp)
                     }
                 }
@@ -318,7 +364,7 @@ fun ConfigEditScreen(
                             DropdownMenuItem(
                                 text = { ModelRow(choice) },
                                 onClick = {
-                                    vm.updateSelectedModel(choice.id)
+                                    onModelChange(choice.id)
                                     modelMenu = false
                                     modelFilter = ""
                                 }
@@ -339,7 +385,7 @@ fun ConfigEditScreen(
                         },
                         fontSize = 11.sp, color = GrayLight
                     )
-                    TextButton(onClick = { vm.setManualModelEntry(true) }) {
+                    TextButton(onClick = { onManualModelEntryChange(true) }) {
                         Text("手动填写", fontSize = 12.sp)
                     }
                 }
@@ -351,7 +397,7 @@ fun ConfigEditScreen(
             // ---------- 4 测试连接 ----------
             Row(verticalAlignment = Alignment.CenterVertically) {
                 OutlinedButton(
-                    onClick = { vm.testConnection() },
+                    onClick = onTestConnection,
                     enabled = testState != TestUiState.Testing,
                     modifier = Modifier.heightIn(min = 48.dp),
                     shape = CircleShape
@@ -394,7 +440,7 @@ fun ConfigEditScreen(
             FieldLabel("模型名称", required = true, filled = form.modelName.isNotBlank())
             OutlinedTextField(
                 value = form.modelName,
-                onValueChange = vm::updateModelName,
+                onValueChange = onModelNameChange,
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(fields[ConfigField.MODEL_NAME.ordinal].focus)
@@ -414,7 +460,7 @@ fun ConfigEditScreen(
             // ---------- 6 保存 ----------
             Spacer(Modifier.height(20.dp))
             Button(
-                onClick = { vm.save() },
+                onClick = onSave,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Ink)
@@ -427,7 +473,7 @@ fun ConfigEditScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { vm.toggleAdvanced() }
+                    .clickable(onClick = onToggleAdvanced)
                     .padding(vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -444,7 +490,7 @@ fun ConfigEditScreen(
                 FieldLabel("API 地址")
                 OutlinedTextField(
                     value = form.baseUrl,
-                    onValueChange = vm::updateBaseUrl,
+                    onValueChange = onBaseUrlChange,
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(fields[ConfigField.BASE_URL.ordinal].focus)

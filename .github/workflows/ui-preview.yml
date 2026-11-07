@@ -39,12 +39,33 @@ jobs:
           sed -i \
             's#mirrors.cloud.tencent.com/gradle/#services.gradle.org/distributions/#' \
             gradle/wrapper/gradle-wrapper.properties
+          # GitHub runner 使用已有的官方仓库，跳过地区镜像。
+          sed -i '/maven\.aliyun\.com/d' settings.gradle.kts
 
-      - name: 渲染引导页
+      - name: 渲染全部预览
         run: |
+          preview_class=app.polyglot.dev.preview.AppPreviewsKt
+          screens=(Onboarding EmptyChat Conversation Sessions SwitchModel ModelServices AddService EditService)
+          preview_args=()
+          for screen in "${screens[@]}"; do
+            preview_args+=("--fqn=$preview_class.${screen}Preview")
+          done
+
+          preview_dir="$RUNNER_TEMP/compose-previews"
           android --sdk="$ANDROID_HOME" preview render :app \
-            --fqn=app.polyglot.dev.preview.OnboardingPreviewKt.OnboardingPreview \
-            --output=ui-previews
+            --output="$preview_dir" "${preview_args[@]}"
+
+          mkdir -p ui-previews
+          class_dir="${preview_class//./\/}"
+          for screen in "${screens[@]}"; do
+            png="$preview_dir/$class_dir/${screen}Preview_0.png"
+            if [[ ! -s "$png" ]]; then
+              echo "::error::缺少 $screen 的预览 PNG"
+              exit 1
+            fi
+            cp "$png" "ui-previews/$screen.png"
+          done
+          file ui-previews/*.png
 
       - name: 上传截图
         uses: actions/upload-artifact@v4
