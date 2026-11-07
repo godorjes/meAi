@@ -41,19 +41,8 @@ jobs:
           sed -i \
             's#mirrors.cloud.tencent.com/gradle/#services.gradle.org/distributions/#' \
             gradle/wrapper/gradle-wrapper.properties
-
-      - name: 检查 KSP 插件仓库
-        run: |
-          marker='com/google/devtools/ksp/com.google.devtools.ksp.gradle.plugin/2.0.21-1.0.28/com.google.devtools.ksp.gradle.plugin-2.0.21-1.0.28.pom'
-          for repo in \
-            https://maven.aliyun.com/repository/gradle-plugin \
-            https://maven.aliyun.com/repository/central \
-            https://plugins.gradle.org/m2 \
-            https://repo.maven.apache.org/maven2; do
-            printf '%s: ' "$repo"
-            curl -sSL --connect-timeout 6 --max-time 12 -o /dev/null \
-              -w 'HTTP %{http_code} (%{url_effective})\n' "$repo/$marker" || true
-          done
+          # GitHub runner 使用已有的官方仓库，跳过地区镜像。
+          sed -i '/maven\.aliyun\.com/d' settings.gradle.kts
 
       - name: 渲染引导页
         id: render
@@ -62,15 +51,13 @@ jobs:
             --fqn=app.polyglot.dev.preview.OnboardingPreviewKt.OnboardingPreview \
             --output=ui-previews -- --info --stacktrace
 
-      - name: 检查 Gradle 失败详情
+      - name: 输出构建失败日志
         if: failure() && steps.render.outcome == 'failure'
         run: |
           shopt -s nullglob
           for log in /tmp/build-log-*.log; do
-            printf 'Android CLI build log: %s\n' "$log"
-            tail -n 260 "$log"
+            tail -n 220 "$log"
           done
-          ./gradlew help --no-daemon --console=plain --refresh-dependencies --info --stacktrace
 
       - name: 上传截图
         uses: actions/upload-artifact@v4
